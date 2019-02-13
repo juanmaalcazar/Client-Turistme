@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="createUser.js"></script>
+	<title>Crud Usuarios</title>
+
+	<style>
+	*
+	{
+		font-family: sans-serif;
+	}
+	body
+	{
+		background-image: url("travel.jpg");
+	}
+	#form
+	{
+		text-align: center;
+		background-color: rgba(221, 183, 255, 0.5);
+
+		padding: 5px;
+		margin-left: auto;
+		margin-right: auto;
+		width: 250px;
+	}
+
+	#Estructura
+	{
+		text-align: center;
+		background-color: rgba(221, 183, 255, 0.5);
+
+		padding: 5px;
+		margin-left: auto;
+		margin-right: auto;
+		width: 250px;
+		margin-top: inherit;
+	}
+
+	h1
+	{
+		margin-top: 10%;
+		text-align: center;
+	}
+	.respuesta
+	{
+		text-align: center;
+		background-color: rgba(221, 183, 255, 0.5);
+
+		padding: 5px;
+		margin-left: auto;
+		margin-right: auto;
+		width: 200px;
+		color:white;
+	}
+	.tabla
+	{
+		text-align: center;
+		background-color: rgba(221, 183, 255, 0.5);
+
+		margin-left: auto;
+		margin-right: auto;
+		padding: 10px;
+		color:white;
+	}
+	.btn
+	{
+		text-align: center;
+
+		padding: 5px;
+		margin-left: auto;
+		margin-right: auto;
+	}	
+	.error
+	{
+		text-align: center;
+		background-color: rgba(221, 183, 255, 0.5);
+
+		padding: 5px;
+		margin-left: auto;
+		margin-right: auto;
+		width: 200px;
+		color:white;
+	}
+</style>
+</head>
+<body>
+
+	<h1>User</h1>
+
+	<div id="form">
+		<h3>Crud Usuarios</h3>
+		<input type="name" id="name" placeholder="Name">
+		<br><br>
+		<input type="email" id="email" placeholder="Email">
+		<br><br>
+		<input id="password" type="password" placeholder="Password">
+		<br><br>
+		<!-- 		<input class="btn" type="button" onclick="CreateUsuarios()" value="Crear usuario"> -->
+		<input type="submit" id="create_user" class="btn" value="Crear">
+		<br><br>
+	</div>
+
+	<div id="Estructura">
+		<input class="btn" id="listUsers" type="button" onclick="allUsers()" value="Mostrar Usuarios">
+	</div>
+
+	<div id="Estructura">
+		<input class="btn" type="button" onclick="CerrarSesion()" value="Cerrar Sesion">
+	</div>
+</body>
+
+<script type="text/javascript">
+
+	if(!localStorage.getItem("Authorization"))
+	{
+		window.location = "http://localhost:8888/Client/login.html";
+	}
+
+	// $( document ).ready(function() {
+ //    console.log("funciona esto");
+ //    allUsers();
+	// 	});
+
+	function allUsers(){
+
+		var Authorization = localStorage.getItem("Authorization"); 
+		$(".error").remove();
+		$("#tabla").remove();
+		$.ajax({
+		 	method: "GET",
+		 	url: "http://localhost:8888/TuristMe/public/index.php/api/users",
+		 	headers:
+		 	{
+		 		"Authorization" : Authorization 
+		 	},
+		 	success: function(response){
+				
+				var response = jQuery.parseJSON(response);
+				console.log(response);
+				if(document.getElementById("tabla") == null)
+				{
+					$('<table id="tabla"/>').html("").appendTo('#Estructura');
+					$('<th id="filaNombre" class="respuesta"/>').html("Nombre del Usuario").appendTo('#tabla');
+					$('<th id="filaEmail" class="respuesta"/>').html("Email").appendTo('#tabla');
+					$('<th id="filaEditar" class="respuesta"/>').html("Editar").appendTo('#tabla');
+					$('<th id="filaBorrar" class="respuesta"/>').html("Borrar").appendTo('#tabla');
+				}
+				
+				for (i = 0; i < response.data.length; i++) {
+					//Columna Nombre
+				  	$('<div/><br>').html(response.data[i].nombre).appendTo('#filaNombre');
+				  	//Columna Email
+				  	$('<div/><br>').html(response.data[i].email).appendTo('#filaEmail');
+				  	//Fila editar
+				  	$('<br>').html("").appendTo('#filaEditar');
+
+				  	$('<input id="name" type="text"  class="editName" placeholder="Nuevo Nombre">').html("").appendTo('#filaEditar').attr("id", response.data[i].id + "Name");
+				  	$('<input id="email" type="email"  class="editEmail" placeholder="Nuevo Email">').html("").appendTo('#filaEditar').attr("id", response.data[i].id + "Email");
+				  	$('<input id="password" type="password"  class="editPasword" placeholder="Nuevo password">').html("").appendTo('#filaEditar').attr("id", response.data[i].id + "Password");
+				  	$('<input type="button" class="btn" onclick="EditUser(this)" value="Editar">').html("").appendTo('#filaEditar').attr("id", response.data[i].id);
+				  	$('<br>').html("").appendTo('#filaEditar');
+				  	//Fila Borrar
+				  	$('<br><input type="button" onclick="Delete(this)" class="btn" value="Borrar"><br>').html("").appendTo('#filaBorrar').attr("id", response.data[i].id);
+				};
+		 	},
+		
+		 	error: function(response){
+		 		var response = jQuery.parseJSON(response.responseText);
+		 		$('<div class="error"/>').html(response.message).appendTo('body');
+
+		 	}
+		});
+	}
+
+	function EditUser(button){
+		var Authorization = localStorage.getItem("Authorization");
+		var idUser = button.id;
+		var name = document.getElementById(button.id + "Name");
+		var email = document.getElementById(button.id + "Email");
+		var password = document.getElementById(button.id + "Password");
+		$(".error").remove();
+		console.log(idUser);
+		console.log(button.id);
+		console.log(name.value);
+		console.log(email.value);
+		console.log(password.value);
+    	$.ajax({
+		 	method: "POST",
+		 	url: "http://localhost:8888/TuristMe/public/index.php/api/updateUser",
+		 	headers:
+		 	{
+		 		"Authorization" : Authorization 
+		 	},
+		 	data: {
+
+		 		idUser: idUser,
+		 		newName: name.value,
+		 		newEmail: email.value,
+		 		newPassword: password.value
+		 	},
+
+		 	success: function(response){
+		 		console.log("entrado en ok");
+		 		var response = jQuery.parseJSON(response);
+		 		$('<div class="error"/>').html(response.message).appendTo('#Estructura');
+		 		allUsers();
+		 	},
+		
+		 	error: function(response){
+		 		console.log("entrado en fallo");
+		 	 	var response = jQuery.parseJSON(response.responseText);
+		 	 	$('<div class="error"/>').html(response.message).appendTo('#Estructura');
+		 	}
+		});
+	}
+
+	function Delete(button) {
+		var Authorization = localStorage.getItem("Authorization");
+		var idUser = button.id;
+		console.log(idUser);
+		$(".error").remove(); 
+		$.ajax({
+		 	method: "POST",
+		 	url: "http://localhost:8888/TuristMe/public/index.php/api/deleteUser",
+		 	headers:
+		 	{
+		 		"Authorization" : Authorization 
+		 	},
+		 	data: {
+
+		 		idUser: idUser
+	
+		 	},
+		 	success: function(response){
+		 		var response = jQuery.parseJSON(response);
+		 		$('<div class="error"/>').html(response.message).appendTo('#Estructura');
+		 		allUsers();
+		 	},
+		
+		 	error: function(response){
+		 	 	var response = jQuery.parseJSON(response.responseText);
+		 	 	$('<div class="error"/>').html(response.message).appendTo('#Estructura');
+		 	 	allUsers();
+		 	}
+		});		
+	}
+
+	function CerrarSesion()
+	{
+		console.log("CerrarSesion");
+		localStorage.clear();
+		window.location = "http://localhost:8888/Client/login.html";  
+	}
+</script>
+</html>

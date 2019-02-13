@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="UTF-8">
+
+	<title>Panel Admin Turistme</title>
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"> </script>
+    
+    <style>
+        *
+        {
+            font-family: sans-serif;
+        }
+
+
+        body
+        {
+            background-image: url("travel.jpg");
+        }
+
+        #form{
+            text-align: center;
+            box-shadow: 0 0 50px #aaa;
+            border-radius: 10px;
+            margin-right: auto;
+            margin-left:auto;
+            width: 500px;
+            height: 150px;
+            background-color: rgba(100, 80, 126, 0.4);
+            margin-top: 180px;
+        }
+
+        table{
+            margin-left: 120px;
+        }
+
+        h1
+        {  
+            text-align: center;
+            color: black;
+        }
+
+
+    </style>
+    
+</head>
+<body>
+
+     <div id="form">
+        
+        <h1>Panel Admin Turistme</h1>
+
+        <table>           
+            <tr>
+                <td>Email</td>
+                <td><input type="email" id="mail"></td>
+            </tr>
+            <tr>
+                <td>Password</td>
+                <td><input type="password" id="password"></td>
+            </tr>
+            <tr><td>
+                <button onclick="peticion();"> Login </button>
+            </td>
+            </tr>
+        </table>
+
+    </div>
+
+	<script>
+
+
+        function peticion(){
+            
+            var email = document.getElementById('mail').value;
+            var password = document.getElementById('password').value;
+
+            $.ajax({
+
+                // la URL para la petición
+                url : "http://localhost:8888/TuristMe/public/index.php/api/login",
+             
+                // la información a enviar
+             
+                data : {password: password, email: email},
+             
+                // especifica si será una petición POST o GET
+
+                type : 'POST',
+             
+                // el tipo de información que se espera de respuesta
+                
+                dataType : 'json',
+             
+                // código a ejecutar si la petición es satisfactoria;
+                // la respuesta es pasada como argumento a la función
+
+
+
+                success : function(json) {
+                    
+                    console.log("Usuario Logeado");
+                    
+
+                },
+
+                error : function(xhr, status){
+
+                    console.log("Ha ocurrido un fallo en el Login"); // mensaje que salta en el navegador
+                },
+
+                // complete : function(xhr, status){
+                //     console.log("Peticion realizada");
+                // }
+
+                 })
+
+
+                .done(function(data, text, done)
+                {
+            
+                    var Authorization = localStorage.setItem('Authorization',data.data);
+                    console.log(data);
+                    window.open("http://localhost:8888/Client/user.html");
+       
+                })
+                .fail(function(msg){
+                alert("Error en el email o contraseña, revíselo");
+                 });
+
+        }
+
+    </script>   
+
+
+</html>
